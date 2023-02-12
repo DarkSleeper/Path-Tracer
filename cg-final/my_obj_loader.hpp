@@ -5,7 +5,8 @@
 #include "tool/tiny_obj_loader.h"
 
 void my_load_obj(std::string const& filename, std::string const& basepath, 
-					std::vector<float>& vertices, std::vector<float>& normals, std::vector<float>& texcoord) {
+					std::vector<float>& vertices, std::vector<float>& normals, std::vector<float>& texcoord,
+					std::vector<int>& mat_idx, std::vector<tinyobj::material_t>& materials) {
 	auto load_model = [](tinyobj::attrib_t &attrib, std::vector<tinyobj::shape_t> &shapes, std::vector<tinyobj::material_t> &materials,
 						 const char* filename, const char* basepath = NULL, bool triangulate = true) -> bool {
 		std::string warn;
@@ -21,19 +22,8 @@ void my_load_obj(std::string const& filename, std::string const& basepath,
 	};
 	tinyobj::attrib_t attrib;
 	std::vector<tinyobj::shape_t> shapes;
-	std::vector<tinyobj::material_t> materials;
 	bool triangulate = true;
 	load_model(attrib, shapes, materials, filename.data(), basepath.data(), triangulate);
-
-	// init
-	//int vertice_num = attrib.vertices.size() / 3;
-	//normals.resize(vertice_num * 3);
-
-	//for (size_t v = 0; v < vertice_num; v++) {
-	//	vertices.push_back(attrib.vertices[3 * v + 0]);
-	//	vertices.push_back(attrib.vertices[3 * v + 1]);
-	//	vertices.push_back(attrib.vertices[3 * v + 2]);
-	//}
 
 	// For each shape
 	for (size_t i = 0; i < shapes.size(); i++) {
@@ -56,6 +46,10 @@ void my_load_obj(std::string const& filename, std::string const& basepath,
 				texcoord.push_back(attrib.texcoords[2 * idx.texcoord_index + 0]);
 				texcoord.push_back(attrib.texcoords[2 * idx.texcoord_index + 1]);
 			}
+			mat_idx.push_back(shapes[i].mesh.material_ids[f]);
+
+			if (fnum != 3) printf("  face[%ld] is not triangle!\n", static_cast<long>(f));
+
 			index_offset += fnum;
 		}
 	}
