@@ -6,7 +6,7 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tool/tiny_obj_loader.h"
 
-void my_load_obj(std::string const& filename, std::string const& basepath, std::vector<Triangle>& triangles, std::vector<Material>& materials) {
+void my_load_obj(std::string const& filename, std::string const& basepath, std::vector<Triangle>& triangles, std::vector<Material*>& materials) {
 	auto load_model = [](tinyobj::attrib_t &attrib, std::vector<tinyobj::shape_t> &shapes, std::vector<tinyobj::material_t> &materials,
 						 const char* filename, const char* basepath = NULL, bool triangulate = true) -> bool {
 		std::string warn;
@@ -28,12 +28,12 @@ void my_load_obj(std::string const& filename, std::string const& basepath, std::
 
 	materials.clear();
 	for (auto& inner_mat: inner_materials) {
-		Material mat;
-		mat.diffuse = glm::vec3(inner_mat.diffuse[0], inner_mat.diffuse[1], inner_mat.diffuse[2]);
-		mat.specular = glm::vec3(inner_mat.specular[0], inner_mat.specular[1], inner_mat.specular[2]);
-		mat.transmittance = glm::vec3(inner_mat.transmittance[0], inner_mat.transmittance[1], inner_mat.transmittance[2]);
-		mat.shininess = inner_mat.shininess;
-		mat.ior = inner_mat.ior;
+		Phong_Material* mat = new Phong_Material();
+		mat->diffuse = glm::vec3(inner_mat.diffuse[0], inner_mat.diffuse[1], inner_mat.diffuse[2]);
+		mat->specular = glm::vec3(inner_mat.specular[0], inner_mat.specular[1], inner_mat.specular[2]);
+		mat->transmittance = glm::vec3(inner_mat.transmittance[0], inner_mat.transmittance[1], inner_mat.transmittance[2]);
+		mat->shininess = inner_mat.shininess;
+		mat->ior = inner_mat.ior;
 		materials.push_back(mat);
 	}
 
