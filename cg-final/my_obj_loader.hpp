@@ -60,7 +60,7 @@ void my_load_obj(std::string const& filename, std::string const& basepath, std::
 				tri.texcoord[v] = glm::vec2(attrib.texcoords[2 * idx.texcoord_index + 0],
 											attrib.texcoords[2 * idx.texcoord_index + 1]);
 			}
-			tri.mat_idx = shapes[i].mesh.material_ids[f];
+			tri.mat = materials[shapes[i].mesh.material_ids[f]];
 			triangles.push_back(tri);
 
 			index_offset += fnum;
