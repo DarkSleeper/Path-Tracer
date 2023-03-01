@@ -5,11 +5,16 @@
 
 struct Material 
 {
+	std::string name;
+
 	glm::vec3 diffuse;
 	glm::vec3 specular;
 	glm::vec3 transmittance;
 	float shininess;
 	float ior;       // index of refraction
+
+	bool is_light{false};
+	glm::vec3 radiance; // light_color
 
 	virtual glm::vec3 shade(const Ray& ray, const Hit& hit, const glm::vec3& dir_to_light, const glm::vec3& light_color) const = 0;
 };

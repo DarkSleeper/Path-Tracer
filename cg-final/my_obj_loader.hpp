@@ -29,6 +29,7 @@ void my_load_obj(std::string const& filename, std::string const& basepath, std::
 	materials.clear();
 	for (auto& inner_mat: inner_materials) {
 		Phong_Material* mat = new Phong_Material();
+		mat->name = inner_mat.name;
 		mat->diffuse = glm::vec3(inner_mat.diffuse[0], inner_mat.diffuse[1], inner_mat.diffuse[2]);
 		mat->specular = glm::vec3(inner_mat.specular[0], inner_mat.specular[1], inner_mat.specular[2]);
 		mat->transmittance = glm::vec3(inner_mat.transmittance[0], inner_mat.transmittance[1], inner_mat.transmittance[2]);
