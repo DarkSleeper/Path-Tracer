@@ -26,7 +26,7 @@ struct Phong_Material: Material
 		glm::vec3 v = glm::vec3(-1, -1, -1) * ray.getDirection();
 		glm::vec3 n = hit.getNormal();
 		glm::vec3 h = v + dir_to_light;
-		glm::normalize(h);
+		h = glm::normalize(h);
 		float an = glm::dot(n, h);
 		if (glm::dot(dir_to_light, n) < 0) an = 0;
 		an = pow(an, shininess);

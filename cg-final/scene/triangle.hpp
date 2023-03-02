@@ -19,7 +19,7 @@ struct Triangle {
 		auto B = position[1];
 		auto C = position[2];
 		auto norm = normal[0] + normal[1] + normal[2];
-		glm::normalize(norm);
+		norm = glm::normalize(norm);
 
 		float d0 = det3x3(A.x - B.x, A.x - C.x, Rd.x,
 			A.y - B.y, A.y - C.y, Rd.y,
