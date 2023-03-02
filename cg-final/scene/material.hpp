@@ -35,3 +35,12 @@ struct Phong_Material: Material
 		return diffuse * light_color * ad + specular * light_color * an;
 	}
 };
+
+struct Light_Material: Material 
+{
+	virtual glm::vec3 shade(const Ray& ray, const Hit& hit, const glm::vec3& dir_to_light, const glm::vec3& light_color) const 
+	{
+		// set void intentionally
+		return radiance;
+	}
+};

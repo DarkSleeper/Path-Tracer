@@ -5,17 +5,8 @@
 #include "scene/material.hpp"
 #include "scene/camera.hpp"
 
-void my_load_scene(std::string const& filename, std::vector<Material*>& materials, Camera_Config& camera)
+void my_load_scene(std::string const& filename, std::vector<Material*>& light_materials, Camera_Config& camera)
 {
-	auto find_name = [&](const char* mat_name) -> Material* 
-	{
-		for (auto mat: materials) {
-			if (mat->name == mat_name)
-				return mat;
-		}
-		return nullptr;
-	};
-
 	TiXmlDocument file;
 	if (!file.LoadFile(filename.data())) {
 		std::cout << "xml load failed: " << filename << std::endl;
@@ -52,16 +43,17 @@ void my_load_scene(std::string const& filename, std::vector<Material*>& material
 		else if (container ->ValueTStr()== "light") 
 		{
 			auto mat_name = container->Attribute("mtlname");
-			if (auto mat = find_name(mat_name)) {
-				mat->is_light = true;
-				std::string rad_str = container->Attribute("radiance");
-				auto x_pos = rad_str.find_first_of(',');
-				mat->radiance.x = atof(rad_str.substr(0, x_pos).data());
-				rad_str = rad_str.substr(x_pos + 1);
-				auto y_pos = rad_str.find_first_of(',');
-				mat->radiance.y = atof(rad_str.substr(0, y_pos).data());
-				mat->radiance.z = atof(rad_str.substr(y_pos + 1).data());
-			}
+			Light_Material* mat = new Light_Material();
+			mat->name = mat_name;
+			mat->is_light = true;
+			std::string rad_str = container->Attribute("radiance");
+			auto x_pos = rad_str.find_first_of(',');
+			mat->radiance.x = atof(rad_str.substr(0, x_pos).data());
+			rad_str = rad_str.substr(x_pos + 1);
+			auto y_pos = rad_str.find_first_of(',');
+			mat->radiance.y = atof(rad_str.substr(0, y_pos).data());
+			mat->radiance.z = atof(rad_str.substr(y_pos + 1).data());
+			light_materials.push_back(mat);
 		}
 		container = container->NextSiblingElement();
 	}

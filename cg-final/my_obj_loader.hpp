@@ -6,7 +6,18 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tool/tiny_obj_loader.h"
 
-void my_load_obj(std::string const& filename, std::string const& basepath, std::vector<Triangle>& triangles, std::vector<Material*>& materials) {
+void my_load_obj(std::string const& filename, std::string const& basepath, std::vector<Triangle>& triangles, std::vector<Triangle>& light_triangles,
+				 std::vector<Material*>& materials, std::vector<Material*>& light_materials) 
+{
+	auto find_light_mat = [&](std::string& mat_name) -> Material*
+	{
+		for (auto light_mat: light_materials) {
+			if (light_mat->name == mat_name) {
+				return light_mat;
+			}
+		}
+		return nullptr;
+	};
 	auto load_model = [](tinyobj::attrib_t &attrib, std::vector<tinyobj::shape_t> &shapes, std::vector<tinyobj::material_t> &materials,
 						 const char* filename, const char* basepath = NULL, bool triangulate = true) -> bool {
 		std::string warn;
@@ -28,14 +39,24 @@ void my_load_obj(std::string const& filename, std::string const& basepath, std::
 
 	materials.clear();
 	for (auto& inner_mat: inner_materials) {
-		Phong_Material* mat = new Phong_Material();
-		mat->name = inner_mat.name;
-		mat->diffuse = glm::vec3(inner_mat.diffuse[0], inner_mat.diffuse[1], inner_mat.diffuse[2]);
-		mat->specular = glm::vec3(inner_mat.specular[0], inner_mat.specular[1], inner_mat.specular[2]);
-		mat->transmittance = glm::vec3(inner_mat.transmittance[0], inner_mat.transmittance[1], inner_mat.transmittance[2]);
-		mat->shininess = inner_mat.shininess;
-		mat->ior = inner_mat.ior;
-		materials.push_back(mat);
+		if (auto light_mat = find_light_mat(inner_mat.name)) 
+		{
+			light_mat->diffuse = glm::vec3(inner_mat.diffuse[0], inner_mat.diffuse[1], inner_mat.diffuse[2]);
+			light_mat->specular = glm::vec3(inner_mat.specular[0], inner_mat.specular[1], inner_mat.specular[2]);
+			light_mat->transmittance = glm::vec3(inner_mat.transmittance[0], inner_mat.transmittance[1], inner_mat.transmittance[2]);
+			light_mat->shininess = inner_mat.shininess;
+			light_mat->ior = inner_mat.ior;
+			materials.push_back(light_mat);
+		} else {
+			Phong_Material* mat = new Phong_Material();
+			mat->name = inner_mat.name;
+			mat->diffuse = glm::vec3(inner_mat.diffuse[0], inner_mat.diffuse[1], inner_mat.diffuse[2]);
+			mat->specular = glm::vec3(inner_mat.specular[0], inner_mat.specular[1], inner_mat.specular[2]);
+			mat->transmittance = glm::vec3(inner_mat.transmittance[0], inner_mat.transmittance[1], inner_mat.transmittance[2]);
+			mat->shininess = inner_mat.shininess;
+			mat->ior = inner_mat.ior;
+			materials.push_back(mat);
+		}
 	}
 
 	// For each shape
@@ -63,6 +84,9 @@ void my_load_obj(std::string const& filename, std::string const& basepath, std::
 			}
 			tri.mat = materials[shapes[i].mesh.material_ids[f]];
 			triangles.push_back(tri);
+			if (tri.mat->is_light) {
+				light_triangles.push_back(tri);
+			}
 
 			index_offset += fnum;
 		}
