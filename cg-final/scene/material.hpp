@@ -44,3 +44,11 @@ struct Light_Material: Material
 		return radiance;
 	}
 };
+
+struct Background_Material: Material 
+{
+	virtual glm::vec3 shade(const Ray& ray, const Hit& hit, const glm::vec3& dir_to_light, const glm::vec3& light_color) const 
+	{
+		return diffuse;
+	}
+};

@@ -5,6 +5,8 @@
 #include "scene/triangle.hpp"
 #include "scene/camera.hpp"
 
+#define MAXnum 100000
+
 int main()
 {
     std::vector<Triangle> triangles;
@@ -23,6 +25,27 @@ int main()
     auto camera = Perspective_Camera(camera_config);
     auto width = camera_config.width;
     auto height = camera_config.height;
+
+    Background_Material *bg_mat = new Background_Material();
+    bg_mat->diffuse = glm::vec3(0.f, 0.f, 0.f);
+
+    float tmin = camera.get_t_min();
+    glm::vec3 n0(0, 0, 0);
+
+	for (int i = 0; i < width; i++) {
+		for (int j = 0; j < height; j++) {
+            // todo: filter & sample
+
+			auto pixel = glm::vec2(1.f * i / width, 1.f * j / width);
+			auto position = pixel;
+			auto r = camera.generate_ray(position);
+            auto h = Hit();
+            h.set(MAXnum, bg_mat, n0, r);
+			// todo: 
+            //color = raytracer->traceRay(r, tmin, 0, 1, 1, h);
+
+		}
+	}
 
     std::cout << "Hello World!\n";
 }
