@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <time.h>
 #include <stdlib.h>
 #include "ray.hpp"
@@ -89,6 +90,15 @@ public:
 					auto r2 = rand() / float(RAND_MAX);
 					next_dir = glm::vec3(sqrtf(1 - powf(r1, 2)) * cosf(2 * M_PI * r2), sqrtf(1 - powf(r1, 2)) * sinf(2 * M_PI * r2), r1);
 					next_dir = glm::normalize(next_dir);
+
+					auto z = glm::vec3(0, 0, 1);
+					auto new_z = hit.getNormal();
+					auto new_x = glm::cross(z, new_z);
+					auto new_y = glm::cross(new_z, new_x);
+					auto rot_matrix = glm::mat3x3{ new_x,new_y,new_z };
+
+					next_dir = rot_matrix * next_dir;
+					//if (glm::dot(next_dir, new_z) < 0) std::cout << "nooo";
 				}
 				Ray next_ray(pin + next_dir * epsilon, next_dir);
 				Hit next_hit(MAXnum, scene->bg_mat, n0);
