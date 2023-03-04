@@ -5,6 +5,7 @@
 #include "hit.hpp"
 #include "../scene/scene_parser.hpp"
 
+
 #define MAXnum 100000
 #define epsilon 0.01f
 #define M_PI 3.1415926

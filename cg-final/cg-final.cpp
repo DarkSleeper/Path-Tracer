@@ -1,4 +1,5 @@
-﻿#include <iostream>
+﻿#define _CRT_SECURE_NO_WARNINGS
+#include <iostream>
 #include "my_obj_loader.hpp"
 #include "my_scene_loader.hpp"
 #include "scene/material.hpp"
@@ -6,6 +7,7 @@
 #include "scene/camera.hpp"
 #include "scene/scene_parser.hpp"
 #include "render/ray_tracer.hpp"
+#include "tool/svpng.h"
 
 #define MAXnum 100000
 
@@ -33,6 +35,7 @@ int main()
     auto camera = Perspective_Camera(camera_config);
     auto width = camera_config.width;
     auto height = camera_config.height;
+    std::vector<unsigned char> out_data(width * height * 3);
 
     auto bg_mat = scene.bg_mat;
     Ray_Tracer ray_tracer(&scene, max_bounce, cutoff_weight, shadows, shade_back);
@@ -52,8 +55,18 @@ int main()
 			// todo: 
             auto color = ray_tracer.traceRay(r, tmin, 0, 1, 1, h);
 
+            out_data[3 * (width * (height - 1 - j) + i) + 0] = (unsigned char)((int)(255 * color.r));
+            out_data[3 * (width * (height - 1 - j) + i) + 1] = (unsigned char)((int)(255 * color.g));
+            out_data[3 * (width * (height - 1 - j) + i) + 2] = (unsigned char)((int)(255 * color.b));
 		}
 	}
+
+
+    // output to show result
+    FILE* fp = fopen("runtime/output/rgba.png", "wb");
+    svpng(fp, width, height, &(out_data[0]), 0);
+    fclose(fp);
+
 
     std::cout << "Hello World!\n";
 }
