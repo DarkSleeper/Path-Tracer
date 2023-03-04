@@ -9,6 +9,14 @@ struct Triangle {
 	glm::vec2 texcoord[3];
 	Material* mat;
 
+	glm::vec3 get_normal(glm::vec3 point) const 
+	{
+		// todo
+		auto norm = normal[0] + normal[1] + normal[2];
+		norm = glm::normalize(norm);
+		return norm;
+	}
+
 	bool intersect(const Ray &r, Hit &h, float tmin) {
 		bool state = 1;
 		glm::vec3 Ro, Rd;
@@ -18,8 +26,6 @@ struct Triangle {
 		auto A = position[0];
 		auto B = position[1];
 		auto C = position[2];
-		auto norm = normal[0] + normal[1] + normal[2];
-		norm = glm::normalize(norm);
 
 		float d0 = det3x3(A.x - B.x, A.x - C.x, Rd.x,
 			A.y - B.y, A.y - C.y, Rd.y,
@@ -40,6 +46,8 @@ struct Triangle {
 		p1 = 1 - p2 - p3;
 		if (p2 + p3 < 1 && p2 > 0 && p3 > 0 && t >= tmin) {
 			if (t < h.getT()) {
+				auto pin = r.pointAtParameter(t);
+				auto norm = get_normal(pin);
 				h.set(t, mat, norm, r);
 			}
 			state = 1;
