@@ -1,6 +1,8 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <time.h>
+#include <stdlib.h>
 #include "ray.hpp"
 #include "hit.hpp"
 #include "../scene/scene_parser.hpp"
@@ -8,7 +10,7 @@
 
 #define MAXnum 100000
 #define epsilon 0.01f
-#define M_PI 3.1415926
+#define M_PI 3.1415926f
 #define posive(X) ((X>=0) ? (X) : (-1 * (X)))
 #define DegreesToRadians(x) ((M_PI * x) / 180.0f)
 
@@ -22,6 +24,8 @@ public:
 		cutoff_weight = c_weight;
 		shadows = shads;
 		shade_back = back;
+
+		srand((unsigned int)time(NULL));
 	}
 	~Ray_Tracer() {}
 
@@ -42,35 +46,58 @@ public:
 		intsec = scene->group_intersect(ray, hit, tmin);
 
 		if (intsec) {
+
+
 			normal = hit.getNormal();
 			pin = hit.getIntersectionPoint();
+
 			if (glm::dot(normal, ray.getDirection()) > 0 && shade_back == 1)
 				hit.set(hit.getT(), hit.getMaterial(), -1.f * normal, ray);
 
-			color = scene->getAmbientLight() * hit.getMaterial()->diffuse;
+			//color = scene->getAmbientLight() * hit.getMaterial()->diffuse;
 			int num_lights = scene->getNumLights();
 			// todo: change ray call
-			for (k = 0; k < num_lights; k++) {
+
+			auto light_weight = rand() / float(RAND_MAX);
+			auto k = choose_light(light_weight);
+			{
+				// compute light
 				scene->getIllumination(k, pin, ldir, clit, Dis2Lit);
-				if (shade_back) pin = pin + ldir * epsilon;//这里是epsilon
-				Ray ray2(pin, ldir);
+				clit = clit / powf(Dis2Lit, 2) * scene->light_areas[k];
+
+				auto new_pin = pin;
+				if (shade_back) new_pin = new_pin + ldir * epsilon;//这里是epsilon
+				Ray ray2(new_pin, ldir);
 				Hit hit2(Dis2Lit, scene->bg_mat, n0);
 
 				if (shade_back) {
 					scene->group_intersect(ray2, hit2, 0);
-				}
-				else {
+				} else {
 					scene->group_intersect(ray2, hit2, epsilon);
 				}
 				if (shadows == 0) {
 					color += (hit.getMaterial())->shade(ray, hit, ldir, clit);
-					//		} else if (hit2.getT() == Dis2Lit) {
-				}
-				else  if (hit2.getT() == INFINITY || posive(hit2.getT() - Dis2Lit) < 0.0001) {//
+				} else  if (hit2.getT() == INFINITY || posive(hit2.getT() - Dis2Lit) < 0.0001) {
 					color += (hit.getMaterial())->shade(ray, hit, ldir, clit);
 				}
-
 			}
+
+			if (!hit.getMaterial()->is_light) {
+				auto next_dir = glm::vec3();
+				{
+					auto r1 = rand() / float(RAND_MAX);
+					auto r2 = rand() / float(RAND_MAX);
+					next_dir = glm::vec3(sqrtf(1 - powf(r1, 2)) * cosf(2 * M_PI * r2), sqrtf(1 - powf(r1, 2)) * sinf(2 * M_PI * r2), r1);
+					next_dir = glm::normalize(next_dir);
+				}
+				Ray next_ray(pin + next_dir * epsilon, next_dir);
+				Hit next_hit(MAXnum, scene->bg_mat, n0);
+				auto next_shade = traceRay(next_ray, 0, bounces + 1, weight, indexOfRefraction, next_hit);
+
+				color += (hit.getMaterial())->shade(ray, hit, next_dir, next_shade) * (2.f * M_PI);
+			}
+
+
 			//glm::vec3 reflectColor = hit.getMaterial()->getReflectiveColor();
 			//if (reflectColor.Length() > 0) {
 			//	glm::vec3 rdir = mirrorDirection(normal, ray.getDirection());
@@ -122,6 +149,15 @@ public:
 		return color;
 	}
 private:
+	auto choose_light(float light_weight) const -> int
+	{
+		for (auto i = 0; i < scene->light_triangles.size(); i++) {
+			if (light_weight <= scene->light_weight_prefix_sum[i])
+				return i;
+		}
+		return 0;
+	}
+
 	Scene_Parser* scene;
 	int max_bounces;
 	float cutoff_weight;

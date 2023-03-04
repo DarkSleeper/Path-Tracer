@@ -13,10 +13,10 @@
 
 int main()
 {
-    int max_bounce = 5;
+    int max_bounce = 20;
     float cutoff_weight = 0.01;
     bool shadows = true;
-    bool shade_back = true;
+    bool shade_back = false;
 
     Scene_Parser scene;
     auto& triangles = scene.triangles;
@@ -26,10 +26,10 @@ int main()
 
     // load scene
     Camera_Config camera_config;
-    std::string xml_filename = "runtime/scene/cornell-box/cornell-box.xml";
+    std::string xml_filename = "runtime/scene/cornell-box-simple/cornell-box.xml";
     my_load_scene(xml_filename, light_materials, camera_config);
-    std::string filename = "runtime/scene/cornell-box/cornell-box.obj";
-    std::string basepath = "runtime/scene/cornell-box/";
+    std::string filename = "runtime/scene/cornell-box-simple/cornell-box.obj";
+    std::string basepath = "runtime/scene/cornell-box-simple/";
     my_load_obj(filename, basepath, triangles, light_triangles, materials, light_materials);
 
     auto camera = Perspective_Camera(camera_config);
@@ -38,6 +38,7 @@ int main()
     std::vector<unsigned char> out_data(width * height * 3);
 
     auto bg_mat = scene.bg_mat;
+    scene.init_light_weight();
     Ray_Tracer ray_tracer(&scene, max_bounce, cutoff_weight, shadows, shade_back);
 
     float tmin = camera.get_t_min();
@@ -54,6 +55,7 @@ int main()
             h.set(MAXnum, bg_mat, n0, r);
 			// todo: 
             auto color = ray_tracer.traceRay(r, tmin, 0, 1, 1, h);
+            glm::clamp(color, glm::vec3(0.f), glm::vec3(1.f));
 
             out_data[3 * (width * (height - 1 - j) + i) + 0] = (unsigned char)((int)(255 * color.r));
             out_data[3 * (width * (height - 1 - j) + i) + 1] = (unsigned char)((int)(255 * color.g));

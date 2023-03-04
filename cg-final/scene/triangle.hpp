@@ -18,7 +18,7 @@ struct Triangle {
 	}
 
 	bool intersect(const Ray &r, Hit &h, float tmin) {
-		bool state = 1;
+		bool state = true;
 		glm::vec3 Ro, Rd;
 		Ro = r.getOrigin();
 		Rd = r.getDirection();
@@ -44,15 +44,15 @@ struct Triangle {
 		p3 = d2 / d0;
 		t = d3 / d0;
 		p1 = 1 - p2 - p3;
-		if (p2 + p3 < 1 && p2 > 0 && p3 > 0 && t >= tmin) {
+		if (p2 + p3 <= 1 && p2 >= 0 && p3 >= 0 && t >= tmin) {
 			if (t < h.getT()) {
 				auto pin = r.pointAtParameter(t);
 				auto norm = get_normal(pin);
 				h.set(t, mat, norm, r);
 			}
-			state = 1;
+			state = true;
 		}
-		else state = 0;
+		else state = false;
 		return state;
 	}
 
