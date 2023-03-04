@@ -16,7 +16,7 @@ struct Material
 	bool is_light{false};
 	glm::vec3 radiance; // light_color
 
-	virtual glm::vec3 shade(const Ray& ray, const Hit& hit, const glm::vec3& dir_to_light, const glm::vec3& light_color) const = 0;
+	virtual glm::vec3 shade(const Ray& ray, const Hit& hit, const glm::vec3& dir_to_light, const glm::vec3& light_color) const { return glm::vec3(0.f); }
 };
 
 struct Phong_Material: Material 

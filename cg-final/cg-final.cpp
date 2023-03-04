@@ -4,15 +4,23 @@
 #include "scene/material.hpp"
 #include "scene/triangle.hpp"
 #include "scene/camera.hpp"
+#include "scene/scene_parser.hpp"
+#include "render/ray_tracer.hpp"
 
 #define MAXnum 100000
 
 int main()
 {
-    std::vector<Triangle> triangles;
-    std::vector<Material *> materials;
-    std::vector<Triangle> light_triangles;
-    std::vector<Material *> light_materials;
+    int max_bounce = 5;
+    float cutoff_weight = 0.01;
+    bool shadows = true;
+    bool shade_back = true;
+
+    Scene_Parser scene;
+    auto& triangles = scene.triangles;
+    auto& materials = scene.materials;
+    auto& light_triangles = scene.light_triangles;
+    auto& light_materials = scene.light_materials;
 
     // load scene
     Camera_Config camera_config;
@@ -26,8 +34,8 @@ int main()
     auto width = camera_config.width;
     auto height = camera_config.height;
 
-    Background_Material *bg_mat = new Background_Material();
-    bg_mat->diffuse = glm::vec3(0.f, 0.f, 0.f);
+    auto bg_mat = scene.bg_mat;
+    Ray_Tracer ray_tracer(&scene, max_bounce, cutoff_weight, shadows, shade_back);
 
     float tmin = camera.get_t_min();
     glm::vec3 n0(0, 0, 0);
@@ -42,7 +50,7 @@ int main()
             auto h = Hit();
             h.set(MAXnum, bg_mat, n0, r);
 			// todo: 
-            //color = raytracer->traceRay(r, tmin, 0, 1, 1, h);
+            auto color = ray_tracer.traceRay(r, tmin, 0, 1, 1, h);
 
 		}
 	}
