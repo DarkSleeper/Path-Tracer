@@ -13,7 +13,7 @@
 
 int main()
 {
-    int max_bounce = 1;
+    int max_bounce = 3;
     float cutoff_weight = 0.01;
     bool shadows = true;
     bool shade_back = false;

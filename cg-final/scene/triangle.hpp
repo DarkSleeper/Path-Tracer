@@ -2,6 +2,7 @@
 #include <glm/glm.hpp>
 #include "material.hpp"
 #include "../tool/determinant.hpp"
+#define posive(X) ((X>=0) ? (X) : (-1 * (X)))
 
 struct Triangle {
 	glm::vec3 position[3];
@@ -23,9 +24,17 @@ struct Triangle {
 		Ro = r.getOrigin();
 		Rd = r.getDirection();
 
+		{
+			auto new_norm = glm::cross(position[0] - position[1], position[0] - position[2]);
+			new_norm = glm::normalize(new_norm);
+
+			if (posive(glm::dot(new_norm, Rd)) <= 0.001f) return false;
+		}
+
 		auto A = position[0];
 		auto B = position[1];
 		auto C = position[2];
+
 
 		float d0 = det3x3(A.x - B.x, A.x - C.x, Rd.x,
 			A.y - B.y, A.y - C.y, Rd.y,
