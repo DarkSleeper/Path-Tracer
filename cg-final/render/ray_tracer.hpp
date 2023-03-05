@@ -10,7 +10,7 @@
 
 
 #define MAXnum 100000
-#define epsilon 0.01f
+#define epsilon 0.001f
 #define M_PI 3.1415926f
 #define posive(X) ((X>=0) ? (X) : (-1 * (X)))
 #define DegreesToRadians(x) ((M_PI * x) / 180.0f)
@@ -37,7 +37,6 @@ public:
 		}
 		//	cout << bounces << endl;
 
-		int k;
 		glm::vec3 ldir, clit, pin;
 		glm::vec3 color(0, 0, 0);
 		float Dis2Lit;
@@ -89,22 +88,28 @@ public:
 					auto r1 = rand() / float(RAND_MAX);
 					auto r2 = rand() / float(RAND_MAX);
 					next_dir = glm::vec3(sqrtf(1 - powf(r1, 2)) * cosf(2 * M_PI * r2), sqrtf(1 - powf(r1, 2)) * sinf(2 * M_PI * r2), r1);
-					next_dir = glm::normalize(next_dir);
+					//next_dir = glm::normalize(next_dir);
 
 					auto z = glm::vec3(0, 0, 1);
 					auto new_z = hit.getNormal();
+					if (posive(glm::dot(z, new_z)) >= 1 - epsilon) z = glm::vec3(0, 1, 0);
 					auto new_x = glm::cross(z, new_z);
+					new_x = glm::normalize(new_x);
 					auto new_y = glm::cross(new_z, new_x);
+					new_y = glm::normalize(new_y);
 					auto rot_matrix = glm::mat3x3{ new_x,new_y,new_z };
 
 					next_dir = rot_matrix * next_dir;
 					//if (glm::dot(next_dir, new_z) < 0) std::cout << "nooo";
 				}
-				Ray next_ray(pin + next_dir * epsilon, next_dir);
-				Hit next_hit(MAXnum, scene->bg_mat, n0);
-				auto next_shade = traceRay(next_ray, 0, bounces + 1, weight, indexOfRefraction, next_hit);
 
-				color += (hit.getMaterial())->shade(ray, hit, next_dir, next_shade) * (2.f * M_PI);
+				Ray next_ray(pin, next_dir);
+				Hit next_hit(MAXnum, scene->bg_mat, n0);
+				auto next_shade = traceRay(next_ray, epsilon, bounces + 1, weight, indexOfRefraction, next_hit);
+
+				if (!next_hit.getMaterial()->is_light) {
+					color += (hit.getMaterial())->shade(ray, hit, next_dir, next_shade) * (2.f * M_PI * M_PI);
+				}
 			}
 
 
