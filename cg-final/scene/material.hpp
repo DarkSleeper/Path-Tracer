@@ -32,7 +32,7 @@ struct Phong_Material: Material
 		an = pow(an, shininess);
 		float ad = glm::dot(dir_to_light, n);
 		if (ad < 0) ad = 0;
-		return diffuse * light_color * ad + specular * light_color * an;
+		return diffuse * light_color * ad / 3.1415926f + specular * light_color * an * (shininess + 1) / 2.f / 3.1415926f;
 	}
 };
 

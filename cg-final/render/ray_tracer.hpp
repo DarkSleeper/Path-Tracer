@@ -45,7 +45,6 @@ public:
 
 			//color = scene->getAmbientLight() * hit.getMaterial()->diffuse;
 			int num_lights = scene->getNumLights();
-			// todo: change ray call
 
 			auto light_weight = rand() / float(RAND_MAX);
 			auto k = choose_light(light_weight);
@@ -57,11 +56,11 @@ public:
 				clit = (clit / powf(Dis2Lit, 2)) * scene->light_areas[k];
 
 				Ray ray2(pin, ldir);
-				Hit hit2(Dis2Lit, scene->bg_mat, glm::vec3(0, 0, 0));
+				Hit hit2(MAXnum, scene->bg_mat, glm::vec3(0, 0, 0));
 
-				scene->group_intersect(ray2, hit2, epsilon);
+				bool intersect2 = scene->group_intersect(ray2, hit2, epsilon);
 
-				if (hit2.getT() == INFINITY || posive(hit2.getT() - Dis2Lit) < 0.0001) {
+				if (intersect2 && glm::dot(hit2.getNormal(), ldir) < 0.f && posive(hit2.getT() - Dis2Lit) < 0.0001) {
 					color += (hit.getMaterial())->shade(ray, hit, ldir, clit);
 				}
 			}
@@ -88,7 +87,7 @@ public:
 
 			Ray next_ray(pin, next_dir);
 			Hit next_hit(MAXnum, scene->bg_mat, glm::vec3(0, 0, 0));
-			bool intsec;
+			bool intsec = false;
 			intsec = scene->group_intersect(next_ray, next_hit, epsilon);
 
 			if (intsec) {
@@ -96,13 +95,22 @@ public:
 					auto next_shade = Shade(next_ray, next_hit, bounces + 1, weight, indexOfRefraction);
 					color += (hit.getMaterial())->shade(ray, hit, next_dir, next_shade) * (2.f * M_PI);
 				}
+				/*else if (glm::dot(next_ray.getDirection(), next_hit.getNormal()) <= 0) {
+					auto next_shade = next_hit.getMaterial()->radiance;
+					color += (hit.getMaterial())->shade(ray, hit, next_dir, next_shade) * (2.f * M_PI);
+				}*/
 			} else {
-				color = scene->bg_color;
+				color += scene->bg_color;
 			}
 			return color;
 		} 
 		else {
-			return hit.getMaterial()->radiance;
+			if (glm::dot(ray.getDirection(), hit.getNormal()) <= 0 && bounces == 0) {
+				return hit.getMaterial()->radiance;
+			}
+			else {
+				return glm::vec3(0.f);
+			}
 		}
 	}
 

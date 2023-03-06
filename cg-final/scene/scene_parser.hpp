@@ -30,7 +30,7 @@ struct Scene_Parser
     auto getIllumination(int idx, const glm::vec3 &p, glm::vec3&dir, glm::vec3&col, float &distanceToLight) const -> void
     {
         auto& light = light_triangles[idx];
-        auto light_mat = dynamic_cast<Light_Material*>(light.mat);
+        auto light_mat = light.mat;
         auto sample_point = rand_sample(light);
 
         dir = sample_point - p;

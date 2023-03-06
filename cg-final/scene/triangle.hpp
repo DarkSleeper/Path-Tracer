@@ -25,8 +25,11 @@ struct Triangle {
 		Rd = r.getDirection();
 
 		{
+			auto norm = normal[0] + normal[1] + normal[2];
+			norm = glm::normalize(norm);
 			auto new_norm = glm::cross(position[0] - position[1], position[0] - position[2]);
 			new_norm = glm::normalize(new_norm);
+			if (glm::dot(new_norm, norm) <= 0.001f) new_norm = -1.f * new_norm;
 
 			if (posive(glm::dot(new_norm, Rd)) <= 0.001f) return false;
 		}
