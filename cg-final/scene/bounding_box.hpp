@@ -5,6 +5,8 @@
 
 #define min2(a,b) (((a)<(b))?(a):(b))
 #define max2(a,b) (((a)>(b))?(a):(b))
+#define min3(a,b,c) min2(min2(a,b),c)
+#define max3(a,b,c) max2(max2(a,b),c)
 
 // ====================================================================
 // ====================================================================
@@ -47,10 +49,9 @@ public:
 		max2(max.y,v.y),
 		max2(max.z,v.z)); 
   }
-  void extend(Bounding_Box *bb) {
-    assert (bb != NULL);
-    extend(bb->min);
-    extend(bb->max); 
+  void extend(Bounding_Box const& bb) {
+    extend(bb.min);
+    extend(bb.max); 
   }
 
   // DEBUGGING 

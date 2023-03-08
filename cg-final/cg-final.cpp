@@ -38,6 +38,7 @@ int main()
     std::vector<unsigned char> out_data(width * height * 3);
 
     auto bg_mat = scene.bg_mat;
+    scene.init_bounding_box();
     scene.init_light_weight();
     Ray_Tracer ray_tracer(&scene, max_bounce, cutoff_weight, shadows, shade_back);
 

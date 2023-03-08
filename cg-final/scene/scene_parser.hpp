@@ -2,12 +2,13 @@
 
 #include <glm/glm.hpp>
 #include <vector>
-#include "material.hpp"
-#include "triangle.hpp"
 #include <time.h>
 #include <stdlib.h>
 #include <iostream>
 #include <algorithm>
+#include "material.hpp"
+#include "triangle.hpp"
+#include "bounding_box.hpp"
 
 struct Scene_Parser
 {
@@ -50,6 +51,24 @@ struct Scene_Parser
         return state;
     }
 
+    void init_bounding_box()
+    {
+        auto get_traingle_bbox = [] (Triangle const& tri) -> Bounding_Box {
+            auto& a = tri.position[0];
+            auto& b = tri.position[1];
+            auto& c = tri.position[2];
+            glm::vec3 _min, _max;
+            _min = glm::vec3(min3(a.x, b.x, c.x), min3(a.y, b.y, c.y), min3(a.z, b.z, c.z));
+            _max = glm::vec3(max3(a.x, b.x, c.x), max3(a.y, b.y, c.y), max3(a.z, b.z, c.z));
+            return Bounding_Box(_min, _max);
+        };
+
+        bbox = new Bounding_Box(get_traingle_bbox(triangles[0]));
+        for (auto& tri : triangles) {
+            bbox->extend(get_traingle_bbox(tri));
+        }
+    }
+
     void init_light_weight() 
     {
         float area_sum = 0.f;
@@ -65,6 +84,11 @@ struct Scene_Parser
         }
     }
 
+    auto get_bounding_box() const -> Bounding_Box*
+    {
+        return bbox;
+    }
+
     std::vector<Triangle> triangles;
     std::vector<Material*> materials;
     std::vector<Triangle> light_triangles;
@@ -75,6 +99,8 @@ struct Scene_Parser
     glm::vec3 bg_color;
 
 private:
+    Bounding_Box *bbox;
+
     auto rand_sample(Triangle const& tri) const -> glm::vec3
     {
         auto t = rand() / float(RAND_MAX);
