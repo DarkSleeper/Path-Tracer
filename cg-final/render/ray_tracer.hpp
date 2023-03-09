@@ -57,7 +57,7 @@ public:
 				Ray ray2(pin, ldir);
 				Hit hit2(MAXnum, scene->bg_mat, glm::vec3(0, 0, 0));
 
-				bool intersect2 = scene->group_intersect(ray2, hit2, epsilon);
+				bool intersect2 = scene->group_intersect_grid(ray2, hit2, epsilon);
 
 				if (intersect2 && glm::dot(hit2.getNormal(), ldir) < 0.f && posive(hit2.getT() - Dis2Lit) < 0.0001) {
 					color += (hit.getMaterial())->shade(ray, hit, ldir, clit);
@@ -86,7 +86,7 @@ public:
 			Ray next_ray(pin, next_dir);
 			Hit next_hit(MAXnum, scene->bg_mat, glm::vec3(0, 0, 0));
 			bool intsec = false;
-			intsec = scene->group_intersect(next_ray, next_hit, epsilon);
+			intsec = scene->group_intersect_grid(next_ray, next_hit, epsilon);
 
 			if (intsec) {
 				if (!next_hit.getMaterial()->is_light) {
@@ -118,7 +118,7 @@ public:
 		glm::vec3 color(0, 0, 0);
 
 		bool intsec;
-		intsec = scene->group_intersect(ray, hit, tmin);
+		intsec = scene->group_intersect_grid(ray, hit, tmin);
 
 		if (intsec) {
 

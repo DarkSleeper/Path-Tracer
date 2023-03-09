@@ -9,7 +9,7 @@
 #include "object3d_vector.hpp"
 
 #define posive(X) ((X>=0) ? (X) : (-1 * (X)))
-#define epsilon2 0.00001
+#define epsilon2 0.0001f
 
 
 class MarchingInfo {
@@ -192,6 +192,9 @@ public:
 		bb = b;
 		glm::vec3 v0, v1;
 		b->get(v0, v1);
+		v0 -= epsilon2;
+		v1 += epsilon2;
+		bb->set(v0, v1);
 		lx = 1.0 * (v1.x - v0.x) / _nx;
 		ly = 1.0 * (v1.y - v0.y) / _ny;
 		lz = 1.0 * (v1.z - v0.z) / _nz;
@@ -225,11 +228,7 @@ public:
 		MarchingInfo mi;
 		initializeRayMarch(mi, r, tmin);
 		if (mi.GetTmin() == INFINITY) {
-			int obnum = inf_obj.getNumObjects();
 			int state = 0;
-			for (k = 0; k < obnum; k++) {
-				if (inf_obj.getObject(k)->intersect(r, h, tmin)) state = 1;
-			}
 			return state;
 		}
 		int indx, indy, indz;
@@ -241,7 +240,15 @@ public:
 				int state = 0;
 				for (k = 0; k < obnum; k++) {
 					if (objs[indx][indy][indz].getObject(k) == NULL) continue;
-					if (objs[indx][indy][indz].getObject(k)->intersect(r, h, tmin)) state = 1;
+					auto old_hit = h;
+					if (objs[indx][indy][indz].getObject(k)->intersect(r, h, tmin)) {
+						float next_t[3];
+						mi.GetNextT(next_t[0], next_t[1], next_t[2]);
+						if (h.getT() < min3(next_t[0], next_t[1], next_t[2])) {
+							state = 1;
+							old_hit = h;
+						} else h = old_hit;
+					}
 				}
 				if (state) return 1;
 			}
@@ -249,11 +256,7 @@ public:
 			mi.GetIndice(indx, indy, indz);
 
 		}
-		int obnum = inf_obj.getNumObjects();
 		int state = 0;
-		for (k = 0; k < obnum; k++) {
-			if (inf_obj.getObject(k)->intersect(r, h, tmin)) state = 1;
-		}
 		return state;
 	}
 
@@ -462,7 +465,6 @@ public:
 	Bounding_Box* bb;
 	bool*** occ;
 	Object3DVector*** objs;
-	Object3DVector inf_obj;
 	float lx;
 	float ly;
 	float lz;

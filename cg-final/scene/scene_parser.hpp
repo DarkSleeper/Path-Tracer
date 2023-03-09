@@ -8,6 +8,7 @@
 #include <algorithm>
 #include "material.hpp"
 #include "triangle.hpp"
+#include "grid.hpp"
 #include "bounding_box.hpp"
 
 struct Scene_Parser
@@ -51,7 +52,11 @@ struct Scene_Parser
         return state;
     }
 
-    void init_bounding_box()
+    bool group_intersect_grid(const Ray& r, Hit& h, float tmin) {
+        return grid->intersect_2(r, h, tmin);
+    }
+
+    void init_bounding_box_and_grid(int nx, int ny, int nz)
     {
         auto get_traingle_bbox = [] (Triangle const& tri) -> Bounding_Box {
             auto& a = tri.position[0];
@@ -66,6 +71,11 @@ struct Scene_Parser
         bbox = new Bounding_Box(get_traingle_bbox(triangles[0]));
         for (auto& tri : triangles) {
             bbox->extend(get_traingle_bbox(tri));
+        }
+
+        grid = new Grid(bbox, nx, ny, nz);
+        for (auto& tri : triangles) {
+            tri.insertIntoGrid(grid);
         }
     }
 
@@ -89,6 +99,7 @@ struct Scene_Parser
         return bbox;
     }
 
+    Grid* grid;
     std::vector<Triangle> triangles;
     std::vector<Material*> materials;
     std::vector<Triangle> light_triangles;
