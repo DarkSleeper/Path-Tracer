@@ -13,7 +13,7 @@
 
 int main()
 {
-    int max_bounce = 20;
+    int max_bounce = 10;
     float cutoff_weight = 0.01;
     bool shadows = true;
     bool shade_back = false;
@@ -38,7 +38,7 @@ int main()
     std::vector<unsigned char> out_data(width * height * 3);
 
     auto bg_mat = scene.bg_mat;
-    scene.init_bounding_box_and_grid(30, 30, 30);
+    scene.init_bounding_box_and_grid(10, 10, 10);
     scene.init_light_weight();
     Ray_Tracer ray_tracer(&scene, max_bounce, cutoff_weight, shadows, shade_back);
 

@@ -50,8 +50,12 @@ public:
 		xray = horizontal * x;
 		yray = screenup * y;
 
+		auto degrees_to_radians = [](float angle) -> float {
+			return ((3.1415926f * angle) / 180.0f);
+		};
+
 		float a, c;
-		c = 0.5 / tanf(angle / 2);
+		c = 0.5 / tanf(degrees_to_radians(angle / 2));
 		a = sqrtf(c*c - 0.5*0.5);
 		position = center + direction * a;
 		position = position - 0.5f * screenup - 0.5f * horizontal;
