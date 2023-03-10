@@ -26,10 +26,10 @@ int main()
 
     // load scene
     Camera_Config camera_config;
-    std::string xml_filename = "runtime/scene/cornell-box-simple/cornell-box.xml";
+    std::string xml_filename = "runtime/scene/cornell-box/cornell-box.xml";
     my_load_scene(xml_filename, light_materials, camera_config);
-    std::string filename = "runtime/scene/cornell-box-simple/cornell-box.obj";
-    std::string basepath = "runtime/scene/cornell-box-simple/";
+    std::string filename = "runtime/scene/cornell-box/cornell-box.obj";
+    std::string basepath = "runtime/scene/cornell-box/";
     my_load_obj(filename, basepath, triangles, light_triangles, materials, light_materials);
 
     auto camera = Perspective_Camera(camera_config);
@@ -38,7 +38,7 @@ int main()
     std::vector<unsigned char> out_data(width * height * 3);
 
     auto bg_mat = scene.bg_mat;
-    scene.init_bounding_box_and_grid(10, 10, 10);
+    scene.init_bounding_box_and_grid(20, 20, 20);
     scene.init_light_weight();
     Ray_Tracer ray_tracer(&scene, max_bounce, cutoff_weight, shadows, shade_back);
 
