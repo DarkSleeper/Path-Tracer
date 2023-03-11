@@ -75,9 +75,9 @@ public:
 			auto next_dir = glm::vec3();
 			{
 				auto r1 = rand() / float(RAND_MAX);
+				auto alpha = 0.5 * acosf(1 - 2 * r1);
 				auto theta = rand() / float(RAND_MAX);
-				auto circle_sample = glm::vec2(sqrtf(r1) * cosf(2 * M_PI * theta), sqrtf(r1) * sinf(2 * M_PI * theta));
-				next_dir = glm::vec3(circle_sample.x, circle_sample.y, sqrtf(1 - circle_sample.x * circle_sample.x - circle_sample.y * circle_sample.y));
+				next_dir = glm::vec3(cosf(alpha) * cosf(2 * M_PI * theta), cosf(alpha) * sinf(2 * M_PI * theta), sinf(alpha));
 				next_dir = glm::normalize(next_dir);
 
 				auto z = glm::vec3(0, 0, 1);
@@ -102,7 +102,7 @@ public:
 			if (intsec) {
 				if (!next_hit.getMaterial()->is_light) {
 					auto next_shade = Shade(next_ray, next_hit, bounces + 1, weight, indexOfRefraction);
-					color += (hit.getMaterial())->shade(ray, hit, next_dir, next_shade) * (2.f * M_PI);
+					color += (hit.getMaterial())->shade(ray, hit, next_dir, next_shade) / pdf_scene;
 				}
 				else if (glm::dot(next_ray.getDirection(), next_hit.getNormal()) < 0) {
 					auto next_shade = next_hit.getMaterial()->radiance;

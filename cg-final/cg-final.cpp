@@ -67,7 +67,7 @@ int main()
                 }
             }
 
-            color = glm::clamp(color, glm::vec3(0.f), glm::vec3(1.f));
+            color = glm::clamp(color * 50.f, glm::vec3(0.f), glm::vec3(1.f));
             auto to_srgb = [](float linear) -> float {
                 float s;
                 if (linear <= 0.0031308) {
