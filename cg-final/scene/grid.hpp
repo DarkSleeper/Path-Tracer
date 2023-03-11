@@ -9,7 +9,7 @@
 #include "object3d_vector.hpp"
 
 #define posive(X) ((X>=0) ? (X) : (-1 * (X)))
-#define epsilon2 0.0001f
+#define epsilon2 0.001f
 
 
 class MarchingInfo {
