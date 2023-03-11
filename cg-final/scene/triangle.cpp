@@ -44,6 +44,7 @@ bool Triangle::intersect(const Ray &r, Hit &h, float tmin) {
 			auto pin = r.pointAtParameter(t);
 			auto norm = get_normal(pin);
 			h.set(t, mat, norm, r);
+			h.hit_triangle = this;
 		}
 		state = true;
 	}

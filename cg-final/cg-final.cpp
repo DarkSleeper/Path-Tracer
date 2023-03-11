@@ -68,10 +68,18 @@ int main()
             }
 
             color = glm::clamp(color, glm::vec3(0.f), glm::vec3(1.f));
-
-            out_data[3 * (width * (height - 1 - j) + i) + 0] = (unsigned char)((int)(255 * powf(color.r, 1 / 2.2)));
-            out_data[3 * (width * (height - 1 - j) + i) + 1] = (unsigned char)((int)(255 * powf(color.g, 1 / 2.2)));
-            out_data[3 * (width * (height - 1 - j) + i) + 2] = (unsigned char)((int)(255 * powf(color.b, 1 / 2.2)));
+            auto to_srgb = [](float linear) -> float {
+                float s;
+                if (linear <= 0.0031308) {
+                    s = linear * 12.92;
+                } else {
+                    s = 1.055 * powf(linear, 1.0 / 2.4) - 0.055;
+                }
+                return s;
+            };
+            out_data[3 * (width * (height - 1 - j) + i) + 0] = (unsigned char)((int)(255 * to_srgb(color.r)));
+            out_data[3 * (width * (height - 1 - j) + i) + 1] = (unsigned char)((int)(255 * to_srgb(color.g)));
+            out_data[3 * (width * (height - 1 - j) + i) + 2] = (unsigned char)((int)(255 * to_srgb(color.b)));
             
 		}
 	}

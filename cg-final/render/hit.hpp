@@ -2,6 +2,7 @@
 #include "ray.hpp"
 
 class Material;
+class Triangle;
 
 // ====================================================================
 // ====================================================================
@@ -32,6 +33,8 @@ public:
     t = _t; material = m; normal = n; 
     intersectionPoint = ray.pointAtParameter(t); 
   }
+
+  Triangle* hit_triangle;
 
 private: 
 

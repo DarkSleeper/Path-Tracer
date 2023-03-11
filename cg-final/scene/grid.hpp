@@ -192,8 +192,8 @@ public:
 		bb = b;
 		glm::vec3 v0, v1;
 		b->get(v0, v1);
-		v0 -= epsilon2;
-		v1 += epsilon2;
+		v0 -= 0.1f;
+		v1 += 0.1f;
 		bb->set(v0, v1);
 		lx = 1.0 * (v1.x - v0.x) / _nx;
 		ly = 1.0 * (v1.y - v0.y) / _ny;
