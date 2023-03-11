@@ -18,10 +18,13 @@ class Perspective_Camera
 public:
 	Perspective_Camera(Camera_Config config) 
 	{
-		inner_config(config.eye, config.lookat - config.eye, config.up, config.fovy);
+		inner_config(config.eye, config.lookat - config.eye, config.up, config.fovy, config.width, config.height);
 	}
 
-	void inner_config(glm::vec3 cer, glm::vec3 dir, glm::vec3 upp, float ang) {
+	void inner_config(glm::vec3 cer, glm::vec3 dir, glm::vec3 upp, float ang, int _width, int _height) {
+		width = _width;
+		height = _height;
+
 		center = cer;
 		direction = dir;
 		direction = glm::normalize(direction);
@@ -36,6 +39,8 @@ public:
 	}
 
 	Ray generate_ray(glm::vec2 point) {
+		auto ratio = width / height;
+
 		direction = glm::normalize(direction);
 		horizontal = glm::cross(direction, up);
 		horizontal = glm::normalize(horizontal);
@@ -45,8 +50,8 @@ public:
 		float x, y;
 		x = point.x;
 		y = point.y;
-		assert(x >= 0 && x < 1);
-		assert(y >= 0 && y < 1);
+		assert(x >= 0 && x < width);
+		assert(y >= 0 && y < height);
 		xray = horizontal * x;
 		yray = screenup * y;
 
@@ -55,10 +60,10 @@ public:
 		};
 
 		float a, c;
-		c = 0.5 / tanf(degrees_to_radians(angle / 2));
-		a = sqrtf(c*c - 0.5*0.5);
+		c = 0.5 * height / tanf(degrees_to_radians(angle / 2));
+		a = sqrtf(c * c - 0.5 * width * 0.5 * width);
 		position = center + direction * a;
-		position = position - 0.5f * screenup - 0.5f * horizontal;
+		position = position - 0.5f * height * screenup - 0.5f * width * horizontal;
 		position += xray + yray;
 		glm::vec3 raydir = position - center;
 		raydir = glm::normalize(raydir);
@@ -71,6 +76,8 @@ public:
 	}
 
 private:
+	int width;
+	int height;
 	glm::vec3 center;
 	glm::vec3 direction;
 	glm::vec3 up;
