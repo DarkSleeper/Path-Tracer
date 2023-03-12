@@ -13,6 +13,8 @@ struct Material
 	float shininess;
 	float ior;       // index of refraction
 
+	bool is_refelect{ false };
+
 	bool is_light{false};
 	glm::vec3 radiance; // light_color
 

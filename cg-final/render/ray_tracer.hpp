@@ -36,130 +36,137 @@ public:
 			return zero;
 		}
 
-		if (glm::dot(ray.getDirection(), hit.getNormal()) > 0) {
-			glm::vec3 zero(0, 0, 0);
-			return zero;
-		}
+		if (hit.getMaterial()->is_refelect == false) {
 
-		if (!hit.getMaterial()->is_light) {
+			if (glm::dot(ray.getDirection(), hit.getNormal()) > 0) {
+				glm::vec3 zero(0, 0, 0);
+				return zero;
+			}
 
-			glm::vec3 color(0, 0, 0);
+			if (!hit.getMaterial()->is_light) {
+
+				glm::vec3 color(0, 0, 0);
 			
-			auto normal = hit.getNormal();
-			auto pin = hit.getIntersectionPoint();
+				auto normal = hit.getNormal();
+				auto pin = hit.getIntersectionPoint();
 
-			int num_lights = scene->getNumLights();
+				int num_lights = scene->getNumLights();
 
-			auto light_weight = rand() / float(RAND_MAX);
-			auto k = choose_light(light_weight);
-			auto pdf_light = (float)0.f;
-			auto pdf_scene = 0.5f / M_PI;
-			auto sample_choice = rand() / float(RAND_MAX);
-			float w1, w2;
-			{
-				// compute light
-				glm::vec3 ldir, clit;
-				float Dis2Lit;
-				scene->getIllumination(k, pin, ldir, clit, Dis2Lit);
+				auto light_weight = rand() / float(RAND_MAX);
+				auto k = choose_light(light_weight);
+				auto pdf_light = (float)0.f;
+				auto pdf_scene = 0.5f / M_PI;
+				auto sample_choice = rand() / float(RAND_MAX);
+				float w1, w2;
+				{
+					// compute light
+					glm::vec3 ldir, clit;
+					float Dis2Lit;
+					scene->getIllumination(k, pin, ldir, clit, Dis2Lit);
 
-				Ray ray2(pin, ldir);
-				Hit hit2(MAXnum, scene->bg_mat, glm::vec3(0, 0, 0));
+					Ray ray2(pin, ldir);
+					Hit hit2(MAXnum, scene->bg_mat, glm::vec3(0, 0, 0));
 
-				bool intersect2 = scene->group_intersect_grid(ray2, hit2, epsilon);
+					bool intersect2 = scene->group_intersect_grid(ray2, hit2, epsilon);
 
-				if (intersect2 && glm::dot(hit2.getNormal(), ldir) < 0.f && posive(hit2.getT() - Dis2Lit) < 0.001) {
-					auto cos_theta = glm::dot((-1.f) * ldir, hit2.getNormal());
-					auto area = scene->light_areas[k];
-					pdf_light = powf(Dis2Lit, 2) / cos_theta / scene->area_sum;
+					if (intersect2 && glm::dot(hit2.getNormal(), ldir) < 0.f && posive(hit2.getT() - Dis2Lit) < 0.001) {
+						auto cos_theta = glm::dot((-1.f) * ldir, hit2.getNormal());
+						auto area = scene->light_areas[k];
+						pdf_light = powf(Dis2Lit, 2) / cos_theta / scene->area_sum;
 
-					pdf_scene = glm::dot(ldir, hit.getNormal()) / M_PI;
+						pdf_scene = glm::dot(ldir, hit.getNormal()) / M_PI;
+						auto shininess = hit.getMaterial()->shininess;
+						auto next_h = ray.getDirection() * (-1.f) + ldir;
+						next_h = glm::normalize(next_h);
+						pdf_scene += (shininess + 1) / (2.f * M_PI) * powf(glm::dot(hit.getNormal(), next_h), shininess) / (4.0f * glm::dot(ldir, next_h));
+						pdf_scene /= 2.f;
+						w1 = powf(pdf_light, 2) / (powf(pdf_light, 2) + powf(pdf_scene, 2));
+
+						color += w1 * (hit.getMaterial())->shade(ray, hit, ldir, clit) / pdf_light;
+					}
+				}
+
+				auto next_dir = glm::vec3();
+				{
+					auto z = glm::vec3(0, 0, 1);
+					auto new_z = hit.getNormal();
+					if (posive(glm::dot(z, new_z)) >= 1 - epsilon) z = glm::vec3(0, 1, 0);
+					auto new_x = glm::cross(z, new_z);
+					new_x = glm::normalize(new_x);
+					auto new_y = glm::cross(new_z, new_x);
+					new_y = glm::normalize(new_y);
+					auto rot_matrix = glm::mat3x3{ new_x,new_y,new_z };
+
 					auto shininess = hit.getMaterial()->shininess;
-					auto next_h = ray.getDirection() * (-1.f) + ldir;
-					next_h = glm::normalize(next_h);
-					pdf_scene += (shininess + 1) / (2.f * M_PI) * powf(glm::dot(hit.getNormal(), next_h), shininess) / (4.0f * glm::dot(ldir, next_h));
-					pdf_scene /= 2.f;
-					w1 = powf(pdf_light, 2) / (powf(pdf_light, 2) + powf(pdf_scene, 2));
+					if (sample_choice < 0.5) { // diffuse
+						auto r1 = rand() / float(RAND_MAX);
+						auto theta = 0.5 * acosf(1 - 2 * r1);
+						auto r2 = rand() / float(RAND_MAX);
+						auto alpha = 2 * M_PI * r2;
+						next_dir = glm::vec3(cosf(alpha) * sinf(theta), sinf(alpha) * sinf(theta), cosf(theta));
+						next_dir = glm::normalize(next_dir);
 
-					color += w1 * (hit.getMaterial())->shade(ray, hit, ldir, clit) / pdf_light;
-				}
-			}
-
-			auto next_dir = glm::vec3();
-			{
-				auto z = glm::vec3(0, 0, 1);
-				auto new_z = hit.getNormal();
-				if (posive(glm::dot(z, new_z)) >= 1 - epsilon) z = glm::vec3(0, 1, 0);
-				auto new_x = glm::cross(z, new_z);
-				new_x = glm::normalize(new_x);
-				auto new_y = glm::cross(new_z, new_x);
-				new_y = glm::normalize(new_y);
-				auto rot_matrix = glm::mat3x3{ new_x,new_y,new_z };
-
-				auto shininess = hit.getMaterial()->shininess;
-				if (sample_choice < 0.5) { // diffuse
-					auto r1 = rand() / float(RAND_MAX);
-					auto theta = 0.5 * acosf(1 - 2 * r1);
-					auto r2 = rand() / float(RAND_MAX);
-					auto alpha = 2 * M_PI * r2;
-					next_dir = glm::vec3(cosf(alpha) * sinf(theta), sinf(alpha) * sinf(theta), cosf(theta));
-					next_dir = glm::normalize(next_dir);
-
-					next_dir = rot_matrix * next_dir;
+						next_dir = rot_matrix * next_dir;
 				
-				} else { // specular
-					auto r1 = rand() / float(RAND_MAX);
-					auto r2 = rand() / float(RAND_MAX);
-					auto theta = acosf(powf(r1, 1.0f / (shininess + 1)));
-					auto alpha = 2 * M_PI * r2;
-					auto next_h = glm::vec3(cosf(alpha) * sinf(theta), sinf(alpha) * sinf(theta), cosf(theta));
+					} else { // specular
+						auto r1 = rand() / float(RAND_MAX);
+						auto r2 = rand() / float(RAND_MAX);
+						auto theta = acosf(powf(r1, 1.0f / (shininess + 1)));
+						auto alpha = 2 * M_PI * r2;
+						auto next_h = glm::vec3(cosf(alpha) * sinf(theta), sinf(alpha) * sinf(theta), cosf(theta));
+						next_h = glm::normalize(next_h);
+
+						next_h = rot_matrix * next_h;
+
+						auto in_ray = ray.getDirection();
+						next_dir = in_ray - 2.f * glm::dot(in_ray, next_h) * next_h;
+						next_dir = glm::normalize(next_dir);
+
+					}
+
+					pdf_scene = glm::dot(next_dir, hit.getNormal()) / M_PI;
+					auto next_h = ray.getDirection() * (-1.f) + next_dir;
 					next_h = glm::normalize(next_h);
-
-					next_h = rot_matrix * next_h;
-
-					auto in_ray = ray.getDirection();
-					next_dir = in_ray - 2.f * glm::dot(in_ray, next_h) * next_h;
-					next_dir = glm::normalize(next_dir);
-
+					pdf_scene += (shininess + 1) / (2.f * M_PI) * powf(glm::dot(hit.getNormal(), next_h), shininess) / (4.0f * glm::dot(next_dir, next_h));
+					pdf_scene /= 2.f;
 				}
 
-				pdf_scene = glm::dot(next_dir, hit.getNormal()) / M_PI;
-				auto next_h = ray.getDirection() * (-1.f) + next_dir;
-				next_h = glm::normalize(next_h);
-				pdf_scene += (shininess + 1) / (2.f * M_PI) * powf(glm::dot(hit.getNormal(), next_h), shininess) / (4.0f * glm::dot(next_dir, next_h));
-				pdf_scene /= 2.f;
-			}
+				if (glm::dot(next_dir, hit.getNormal()) >= 0) {
+					Ray next_ray(pin, next_dir);
+					Hit next_hit(MAXnum, scene->bg_mat, glm::vec3(0, 0, 0));
+					bool intsec = false;
+					intsec = scene->group_intersect_grid(next_ray, next_hit, epsilon);
 
-			if (glm::dot(next_dir, hit.getNormal()) >= 0) {
-				Ray next_ray(pin, next_dir);
-				Hit next_hit(MAXnum, scene->bg_mat, glm::vec3(0, 0, 0));
-				bool intsec = false;
-				intsec = scene->group_intersect_grid(next_ray, next_hit, epsilon);
-
-				if (intsec) {
-					if (!next_hit.getMaterial()->is_light) {
-						auto next_shade = Shade(next_ray, next_hit, bounces + 1, weight, indexOfRefraction);
-						color += (hit.getMaterial())->shade(ray, hit, next_dir, next_shade) / pdf_scene;
+					if (intsec) {
+						if (!next_hit.getMaterial()->is_light) {
+							auto next_shade = Shade(next_ray, next_hit, bounces + 1, weight, indexOfRefraction);
+							color += (hit.getMaterial())->shade(ray, hit, next_dir, next_shade) / pdf_scene;
+						}
+						else if (glm::dot(next_ray.getDirection(), next_hit.getNormal()) < 0) {
+							auto next_shade = next_hit.getMaterial()->radiance;
+							auto Dis2Lit = glm::length(next_hit.getIntersectionPoint() - hit.getIntersectionPoint());
+							pdf_light = powf(Dis2Lit, 2) / glm::dot((-1.f) * next_ray.getDirection(), next_hit.getNormal()) / scene->area_sum;
+							w2 = powf(pdf_scene, 2) / (powf(pdf_light, 2) + powf(pdf_scene, 2));
+							color += w2 * (hit.getMaterial())->shade(ray, hit, next_dir, next_shade) / pdf_scene;
+						}
+					} else {
+						color += scene->bg_color;
 					}
-					else if (glm::dot(next_ray.getDirection(), next_hit.getNormal()) < 0) {
-						auto next_shade = next_hit.getMaterial()->radiance;
-						auto Dis2Lit = glm::length(next_hit.getIntersectionPoint() - hit.getIntersectionPoint());
-						pdf_light = powf(Dis2Lit, 2) / glm::dot((-1.f) * next_ray.getDirection(), next_hit.getNormal()) / scene->area_sum;
-						w2 = powf(pdf_scene, 2) / (powf(pdf_light, 2) + powf(pdf_scene, 2));
-						color += w2 * (hit.getMaterial())->shade(ray, hit, next_dir, next_shade) / pdf_scene;
-					}
-				} else {
-					color += scene->bg_color;
 				}
-			}
-			return color;
-		} 
-		else {
-			if (glm::dot(ray.getDirection(), hit.getNormal()) <= 0 && bounces == 0) {
-				return hit.getMaterial()->radiance;
-			}
+
+				return color;
+			} 
 			else {
-				return glm::vec3(0.f);
+				if (glm::dot(ray.getDirection(), hit.getNormal()) <= 0 && bounces == 0) {
+					return hit.getMaterial()->radiance;
+				}
+				else {
+					return glm::vec3(0.f);
+				}
 			}
+
+		} else { // reflect
+		
 		}
 	}
 

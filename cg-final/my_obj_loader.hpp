@@ -55,6 +55,8 @@ void my_load_obj(std::string const& filename, std::string const& basepath, std::
 			mat->transmittance = glm::vec3(inner_mat.transmittance[0], inner_mat.transmittance[1], inner_mat.transmittance[2]);
 			mat->shininess = inner_mat.shininess;
 			mat->ior = inner_mat.ior;
+			if (mat->ior != 1.f)
+				mat->is_refelect = true;
 			materials.push_back(mat);
 		}
 	}

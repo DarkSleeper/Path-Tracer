@@ -26,10 +26,10 @@ int main()
 
     // load scene
     Camera_Config camera_config;
-    std::string xml_filename = "runtime/scene/veach-mis/veach-mis.xml";
+    std::string xml_filename = "runtime/scene/staircase/staircase.xml";
     my_load_scene(xml_filename, light_materials, camera_config);
-    std::string filename = "runtime/scene/veach-mis/veach-mis.obj";
-    std::string basepath = "runtime/scene/veach-mis/";
+    std::string filename = "runtime/scene/staircase/stairscase.obj";
+    std::string basepath = "runtime/scene/staircase/";
     my_load_obj(filename, basepath, triangles, light_triangles, materials, light_materials);
 
     auto camera = Perspective_Camera(camera_config);
@@ -38,7 +38,7 @@ int main()
     std::vector<unsigned char> out_data(width * height * 3);
 
     auto bg_mat = scene.bg_mat;
-    scene.init_bounding_box_and_grid(13, 13, 13);
+    scene.init_bounding_box_and_grid(20, 20, 20);
     scene.init_light_weight();
     Ray_Tracer ray_tracer(&scene, max_bounce, cutoff_weight, shadows, shade_back);
 
