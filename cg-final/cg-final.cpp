@@ -26,10 +26,10 @@ int main()
 
     // load scene
     Camera_Config camera_config;
-    std::string xml_filename = "runtime/scene/cornell-box/cornell-box.xml";
+    std::string xml_filename = "runtime/scene/veach-mis/veach-mis.xml";
     my_load_scene(xml_filename, light_materials, camera_config);
-    std::string filename = "runtime/scene/cornell-box/cornell-box.obj";
-    std::string basepath = "runtime/scene/cornell-box/";
+    std::string filename = "runtime/scene/veach-mis/veach-mis.obj";
+    std::string basepath = "runtime/scene/veach-mis/";
     my_load_obj(filename, basepath, triangles, light_triangles, materials, light_materials);
 
     auto camera = Perspective_Camera(camera_config);
@@ -38,14 +38,14 @@ int main()
     std::vector<unsigned char> out_data(width * height * 3);
 
     auto bg_mat = scene.bg_mat;
-    scene.init_bounding_box_and_grid(20, 20, 20);
+    scene.init_bounding_box_and_grid(13, 13, 13);
     scene.init_light_weight();
     Ray_Tracer ray_tracer(&scene, max_bounce, cutoff_weight, shadows, shade_back);
 
     float tmin = camera.get_t_min();
     glm::vec3 n0(0, 0, 0);
 
-    int sample_num = 8;
+    int sample_num = 1;
     auto sample_offset = glm::vec2(1.f / sample_num, 1.f / sample_num);
 	for (int i = 0; i < width; i++) {
 		for (int j = 0; j < height; j++) {
