@@ -36,6 +36,11 @@ public:
 			return zero;
 		}
 
+		if (glm::dot(ray.getDirection(), hit.getNormal()) > 0) {
+			glm::vec3 zero(0, 0, 0);
+			return zero;
+		}
+
 		if (!hit.getMaterial()->is_light) {
 
 			glm::vec3 color(0, 0, 0);
@@ -62,7 +67,7 @@ public:
 
 				bool intersect2 = scene->group_intersect_grid(ray2, hit2, epsilon);
 
-				if (intersect2 && glm::dot(hit2.getNormal(), ldir) < 0.f && posive(hit2.getT() - Dis2Lit) < 0.0001) {
+				if (intersect2 && glm::dot(hit2.getNormal(), ldir) < 0.f && posive(hit2.getT() - Dis2Lit) < 0.001) {
 					auto cos_theta = glm::dot((-1.f) * ldir, hit2.getNormal());
 					auto area = scene->light_areas[k];
 					pdf_light = powf(Dis2Lit, 2) / cos_theta / area;
@@ -107,11 +112,13 @@ public:
 					auto theta = acosf(powf(r1, 1.0f / (shininess + 1)));
 					auto alpha = 2 * M_PI * r2;
 					auto next_h = glm::vec3(cosf(alpha) * sinf(theta), sinf(alpha) * sinf(theta), cosf(theta));
+					next_h = glm::normalize(next_h);
 
 					next_h = rot_matrix * next_h;
 
 					auto in_ray = ray.getDirection();
 					next_dir = in_ray - 2.f * glm::dot(in_ray, next_h) * next_h;
+					next_dir = glm::normalize(next_dir);
 
 				}
 
