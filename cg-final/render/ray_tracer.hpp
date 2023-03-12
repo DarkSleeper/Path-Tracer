@@ -70,7 +70,7 @@ public:
 				if (intersect2 && glm::dot(hit2.getNormal(), ldir) < 0.f && posive(hit2.getT() - Dis2Lit) < 0.001) {
 					auto cos_theta = glm::dot((-1.f) * ldir, hit2.getNormal());
 					auto area = scene->light_areas[k];
-					pdf_light = powf(Dis2Lit, 2) / cos_theta / area;
+					pdf_light = powf(Dis2Lit, 2) / cos_theta / scene->area_sum;
 
 					pdf_scene = glm::dot(ldir, hit.getNormal()) / M_PI;
 					auto shininess = hit.getMaterial()->shininess;
@@ -143,7 +143,7 @@ public:
 					else if (glm::dot(next_ray.getDirection(), next_hit.getNormal()) < 0) {
 						auto next_shade = next_hit.getMaterial()->radiance;
 						auto Dis2Lit = glm::length(next_hit.getIntersectionPoint() - hit.getIntersectionPoint());
-						pdf_light = powf(Dis2Lit, 2) / glm::dot((-1.f) * next_ray.getDirection(), next_hit.getNormal()) / scene->compute_area(*next_hit.hit_triangle);
+						pdf_light = powf(Dis2Lit, 2) / glm::dot((-1.f) * next_ray.getDirection(), next_hit.getNormal()) / scene->area_sum;
 						w2 = powf(pdf_scene, 2) / (powf(pdf_light, 2) + powf(pdf_scene, 2));
 						color += w2 * (hit.getMaterial())->shade(ray, hit, next_dir, next_shade) / pdf_scene;
 					}
