@@ -24,7 +24,7 @@ struct Texture
 		auto u = fit(uv.x);
 		auto v = fit(uv.y);
 		int i = width * u;
-		int j = height * v;
+		int j = height * (1 - v);
 		auto color = glm::vec3((int)data[nrComponents * width * j + nrComponents * i + 0] / 255.f,
 								(int)data[nrComponents * width * j + nrComponents * i + 1] / 255.f,
 								(int)data[nrComponents * width * j + nrComponents * i + 2] / 255.f);
