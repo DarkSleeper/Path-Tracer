@@ -157,7 +157,7 @@ public:
 				return color;
 			} 
 			else {
-				if (glm::dot(ray.getDirection(), hit.getNormal()) <= 0 && bounces == 0) {
+				if (glm::dot(ray.getDirection(), hit.getNormal()) <= 0) {
 					return hit.getMaterial()->radiance;
 				}
 				else {
@@ -166,7 +166,66 @@ public:
 			}
 
 		} else { // reflect
-		
+			auto color = glm::vec3(0.f);
+
+			auto normal = hit.getNormal();
+			auto in_ray = ray.getDirection();
+			glm::vec3 transColor = hit.getMaterial()->transmittance;
+			auto n_io = 1.f;
+			if (glm::dot(in_ray, normal) > 0) { //in_to_out
+				normal = -1.f * normal;
+				n_io = indexOfRefraction / 1.f;
+			} else {
+				n_io = 1.f / hit.getMaterial()->ior;
+			}
+			auto cos_in = -1.f * glm::dot(in_ray, normal);
+			auto sin_in = sqrtf(1 - cos_in * cos_in);
+			auto fr = 1.0f;
+			if (n_io * sin_in < 1) { // refraction
+				auto cos_out = sqrtf(1 - (n_io * sin_in) * (n_io * sin_in));
+				auto r0 = (cos_in - n_io * cos_out) / (cos_in + n_io * cos_out);
+				auto r1 = (n_io * cos_in - cos_out) / (n_io * cos_in + cos_out);
+				fr = 0.5f * (r0 * r0 + r1 * r1);
+				auto re_fr = 1 - fr;
+
+				if (glm::length(transColor) > 0) {
+					glm::vec3 tdir;
+					glm::vec3 tori = hit.getIntersectionPoint();
+					float index_i, index_t;
+
+					tdir = -cos_out * normal + n_io * (in_ray - glm::dot(in_ray, normal) * normal);
+					tori = tori + tdir * epsilon;
+					Ray tray(tori, tdir);
+					Hit thit;
+					float ior = hit.getMaterial()->ior;
+					thit.set(MAXnum, scene->bg_mat, glm::vec3(0.f), tray);
+
+					auto intsec = scene->group_intersect_grid(tray, thit, 0);
+					if (intsec) {
+						color += re_fr * transColor * Shade(tray, thit, bounces + 1, weight, ior);
+					} else {
+						color += scene->bg_color;
+					}
+				}
+
+			}
+
+
+			glm::vec3 rdir = in_ray - 2.f * glm::dot(in_ray, normal) * normal;
+			glm::vec3 rori = hit.getIntersectionPoint();
+			rori = rori + rdir * epsilon;//先移动epsilon
+
+			Ray reray(rori, rdir);
+			Hit rhit;
+			rhit.set(MAXnum, scene->bg_mat, glm::vec3(0.f), reray);
+			auto intsec = scene->group_intersect_grid(reray, rhit, 0);
+			if (intsec) {
+				color += fr * transColor * Shade(reray, rhit, bounces + 1, weight, indexOfRefraction);
+			} else {
+				color += scene->bg_color;
+			}
+
+			return color;
 		}
 	}
 
@@ -187,19 +246,6 @@ public:
 			color = Shade(ray, hit, bounces, weight, indexOfRefraction);
 
 
-			//glm::vec3 reflectColor = hit.getMaterial()->getReflectiveColor();
-			//if (reflectColor.Length() > 0) {
-			//	glm::vec3 rdir = mirrorDirection(normal, ray.getDirection());
-			//	glm::vec3 rori = hit.getIntersectionPoint();
-			//	rori = rori + rdir * epsilon;//先移动epsilon
-
-			//	Ray reray(rori, rdir);
-			//	Hit rhit;
-			//	float rweight = weight * reflectColor.Length();
-			//	rhit.set(MAXnum, scene->getMaterial(0), n0, reray);
-			//	color += reflectColor *
-			//		traceRay(reray, 0, bounces + 1, rweight, indexOfRefraction, rhit);
-			//}
 
 			//if (isvisgrid == 0) {
 			//	glm::vec3 transColor = hit.getMaterial()->getTransparentColor();

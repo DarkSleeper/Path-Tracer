@@ -37,7 +37,7 @@ Ni 1
 newmtl Glass
 Kd 0.5 0.5 0.5
 Ks 0 0 0
-Tr 0.8 1 0.95
+Tf 0.8 1 0.95
 Ns 1
 Ni 1.5
 newmtl Wood
