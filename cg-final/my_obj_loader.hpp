@@ -46,6 +46,7 @@ void my_load_obj(std::string const& filename, std::string const& basepath, std::
 			light_mat->transmittance = glm::vec3(inner_mat.transmittance[0], inner_mat.transmittance[1], inner_mat.transmittance[2]);
 			light_mat->shininess = inner_mat.shininess;
 			light_mat->ior = inner_mat.ior;
+			light_mat->diffuse_texture = nullptr;
 			materials.push_back(light_mat);
 		} else {
 			Phong_Material* mat = new Phong_Material();
@@ -55,8 +56,12 @@ void my_load_obj(std::string const& filename, std::string const& basepath, std::
 			mat->transmittance = glm::vec3(inner_mat.transmittance[0], inner_mat.transmittance[1], inner_mat.transmittance[2]);
 			mat->shininess = inner_mat.shininess;
 			mat->ior = inner_mat.ior;
-			if (mat->ior != 1.f)
-				mat->is_refelect = true;
+			if (mat->ior != 1.f) mat->is_refelect = true;
+			if (!inner_mat.diffuse_texname.empty()) {
+				mat->diffuse_texture = new Texture(basepath + inner_mat.diffuse_texname);
+			} else {
+				mat->diffuse_texture = nullptr;
+			}
 			materials.push_back(mat);
 		}
 	}

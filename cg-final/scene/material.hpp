@@ -2,6 +2,8 @@
 #include <glm/glm.hpp>
 #include "../render/hit.hpp"
 #include "../render/ray.hpp"
+#include "texture.hpp"
+#include "triangle.hpp"
 
 struct Material 
 {
@@ -17,6 +19,8 @@ struct Material
 
 	bool is_light{false};
 	glm::vec3 radiance; // light_color
+
+	Texture* diffuse_texture;
 
 	virtual glm::vec3 shade(const Ray& ray, const Hit& hit, const glm::vec3& dir_to_light, const glm::vec3& light_color) const { return glm::vec3(0.f); }
 };
@@ -34,7 +38,14 @@ struct Phong_Material: Material
 		an = pow(an, shininess);
 		float ad = glm::dot(dir_to_light, n);
 		if (ad < 0) ad = 0;
-		return diffuse * light_color * ad / 3.1415926f + specular * light_color * an * (shininess + 2) / 2.f / 3.1415926f;
+
+		auto out_diffuse = diffuse;
+		if (diffuse_texture != nullptr) {
+			auto uv = hit.hit_triangle->get_uv(hit.getIntersectionPoint());
+			auto tex_color = diffuse_texture->get_color(uv);
+			out_diffuse *= tex_color;
+		}
+		return out_diffuse * light_color * ad / 3.1415926f + specular * light_color * an * (shininess + 2) / 2.f / 3.1415926f;
 	}
 };
 

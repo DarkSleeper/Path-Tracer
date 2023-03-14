@@ -1,4 +1,5 @@
 #include "triangle.hpp"
+#include "material.hpp"
 #include "grid.hpp"
 #include "../tool/determinant.hpp"
 #define posive(X) ((X>=0) ? (X) : (-1 * (X)))
@@ -9,6 +10,29 @@ glm::vec3 Triangle::get_normal(glm::vec3 point) const
 	auto norm = normal[0] + normal[1] + normal[2];
 	norm = glm::normalize(norm);
 	return norm;
+}
+
+glm::vec2 Triangle::get_uv(glm::vec3 point) const
+{
+
+	auto compute_area = [](glm::vec3 pos0, glm::vec3 pos1, glm::vec3 pos2) -> float
+	{
+		auto ab = pos0 - pos1;
+		auto bc = pos1 - pos2;
+		auto res = glm::length(glm::cross(ab, bc)) / 2;
+		return res;
+	};
+
+	auto a = position[0];
+	auto b = position[1];
+	auto c = position[2];
+
+	auto alpha = compute_area(point, b, c) / compute_area(a, b, c);
+	auto beta = compute_area(point, a, c) / compute_area(a, b, c);
+	auto gamma = 1 - alpha - beta;
+
+	auto uv = alpha * texcoord[0] +  beta * texcoord[1] + gamma * texcoord[2];
+	return uv;
 }
 
 bool Triangle::intersect(const Ray &r, Hit &h, float tmin) {
