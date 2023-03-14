@@ -13,7 +13,7 @@
 
 int main()
 {
-    int max_bounce = 10;
+    int max_bounce = 20;
     float cutoff_weight = 0.01;
     bool shadows = true;
     bool shade_back = false;
@@ -45,7 +45,7 @@ int main()
     float tmin = camera.get_t_min();
     glm::vec3 n0(0, 0, 0);
 
-    int sample_num = 1;
+    int sample_num = 3;
     auto sample_offset = glm::vec2(1.f / sample_num, 1.f / sample_num);
 	for (int i = 0; i < width; i++) {
 		for (int j = 0; j < height; j++) {
