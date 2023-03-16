@@ -26,10 +26,10 @@ int main()
 
     // load scene
     Camera_Config camera_config;
-    std::string xml_filename = "runtime/scene/staircase/staircase.xml";
+    std::string xml_filename = "runtime/scene/cornell-box-simple/cornell-box.xml";
     my_load_scene(xml_filename, light_materials, camera_config);
-    std::string filename = "runtime/scene/staircase/stairscase.obj";
-    std::string basepath = "runtime/scene/staircase/";
+    std::string filename = "runtime/scene/cornell-box-simple/cornell-box.obj";
+    std::string basepath = "runtime/scene/cornell-box-simple/";
     my_load_obj(filename, basepath, triangles, light_triangles, materials, light_materials);
 
     auto camera = Perspective_Camera(camera_config);
@@ -45,7 +45,7 @@ int main()
     float tmin = camera.get_t_min();
     glm::vec3 n0(0, 0, 0);
 
-    int sample_num = 8;
+    int sample_num = 3;
     auto sample_offset = glm::vec2(1.f / sample_num, 1.f / sample_num);
 	for (int i = 0; i < width; i++) {
 		for (int j = 0; j < height; j++) {
