@@ -45,7 +45,7 @@ int main()
     float tmin = camera.get_t_min();
     glm::vec3 n0(0, 0, 0);
 
-    int sample_num = 3;
+    int sample_num = 8;
     auto sample_offset = glm::vec2(1.f / sample_num, 1.f / sample_num);
 	for (int i = 0; i < width; i++) {
 		for (int j = 0; j < height; j++) {

@@ -75,7 +75,7 @@ Ns 1
 Ni 1
 newmtl Metal
 Kd 0.2 0.2 0.2
-Ks 0 0.8 0.8
+Ks 0.3 0.3 0.3
 Tr 1 1 1
 Ns 1000
 Ni 1

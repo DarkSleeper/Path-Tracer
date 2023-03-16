@@ -43,9 +43,12 @@ struct Phong_Material: Material
 		if (diffuse_texture != nullptr) {
 			auto uv = hit.hit_triangle->get_uv(hit.getIntersectionPoint());
 			auto tex_color = diffuse_texture->get_color(uv);
+			/*if (name == "FloorTiles") {
+				std::cout << tex_color.x << std::endl;
+			}*/
 			out_diffuse *= tex_color;
 		}
-		return out_diffuse * light_color * ad / 3.1415926f + specular * light_color * an * (shininess + 2) / 2.f / 3.1415926f;
+		return out_diffuse * light_color * ad / 3.1415926f + specular * light_color * an * (shininess + 8) / 8.f / 3.1415926f;
 	}
 };
 
