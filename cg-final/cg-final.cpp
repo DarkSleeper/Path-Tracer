@@ -11,10 +11,20 @@
 
 #define MAXnum 100000
 
-int main()
-{
+int main(int argc, char* argv[]) {
+    std::string model_name = "cornell-box-simple";
+    int sample_num = 3;
+    if (argc == 2) {
+        model_name = argv[1];
+    }
+    if (argc == 3) {
+        model_name = argv[1];
+        sample_num = atoi(argv[2]);
+    }
+    if (sample_num <= 0) {
+        std::cout << "invalid sample num!" << std::endl;
+    }
     int max_bounce = 20;
-    float cutoff_weight = 0.01;
     bool shadows = true;
     bool shade_back = false;
 
@@ -26,10 +36,10 @@ int main()
 
     // load scene
     Camera_Config camera_config;
-    std::string xml_filename = "runtime/scene/cornell-box-simple/cornell-box.xml";
+    std::string xml_filename = "runtime/scene/" + model_name + "/" + model_name + ".xml";
     my_load_scene(xml_filename, light_materials, camera_config);
-    std::string filename = "runtime/scene/cornell-box-simple/cornell-box.obj";
-    std::string basepath = "runtime/scene/cornell-box-simple/";
+    std::string filename = "runtime/scene/" + model_name + "/" + model_name + ".obj";
+    std::string basepath = "runtime/scene/" + model_name + "/";
     my_load_obj(filename, basepath, triangles, light_triangles, materials, light_materials);
 
     auto camera = Perspective_Camera(camera_config);
@@ -40,12 +50,12 @@ int main()
     auto bg_mat = scene.bg_mat;
     scene.init_bounding_box_and_grid(20, 20, 20);
     scene.init_light_weight();
+    float cutoff_weight = 0.01;
     Ray_Tracer ray_tracer(&scene, max_bounce, cutoff_weight, shadows, shade_back);
 
     float tmin = camera.get_t_min();
     glm::vec3 n0(0, 0, 0);
 
-    int sample_num = 3;
     auto sample_offset = glm::vec2(1.f / sample_num, 1.f / sample_num);
 	for (int i = 0; i < width; i++) {
 		for (int j = 0; j < height; j++) {

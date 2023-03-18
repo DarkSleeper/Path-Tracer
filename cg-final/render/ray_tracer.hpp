@@ -13,6 +13,7 @@
 #define epsilon 0.001f
 #define M_PI 3.1415926f
 #define DegreesToRadians(x) ((M_PI * x) / 180.0f)
+#define pdf_rr 0.99f
 
 
 class Ray_Tracer {
@@ -32,6 +33,12 @@ public:
 	glm::vec3 Shade(Ray const& ray, Hit const& hit, int bounces, float weight, float indexOfRefraction) const
 	{
 		if (bounces > max_bounces) {
+			glm::vec3 zero(0, 0, 0);
+			return zero;
+		}
+
+		auto russian_r = rand() / float(RAND_MAX);
+		if (russian_r > pdf_rr) {
 			glm::vec3 zero(0, 0, 0);
 			return zero;
 		}
@@ -154,11 +161,11 @@ public:
 					}
 				}
 
-				return color;
+				return color / pdf_rr;
 			} 
 			else {
 				if (glm::dot(ray.getDirection(), hit.getNormal()) <= 0) {
-					return hit.getMaterial()->radiance;
+					return hit.getMaterial()->radiance / pdf_rr;
 				}
 				else {
 					return glm::vec3(0.f);
@@ -225,7 +232,7 @@ public:
 				color += scene->bg_color;
 			}
 
-			return color;
+			return color / pdf_rr;
 		}
 	}
 
